@@ -1,91 +1,146 @@
-import java.util.List;
-
 public class MyLinkedList {
-        class SinglyListNode{
-            int val;
-            SinglyListNode next;
-            public SinglyListNode(){}
-            public SinglyListNode (int x){ this.val = x;}
+    class ListNode {
+        int val;
+        ListNode next;
+        ListNode prev;
+        public ListNode() {}
+        public ListNode(int val) {
+            this.val = val;
         }
-        SinglyListNode init, tail;
-        int ListSize;
-
-
-        /** Initialize your data structure here. */
-        public MyLinkedList() {
-            ListSize = 0;
-            init = new SinglyListNode();
-            tail = init;
+        public ListNode(int val, ListNode next){
+            this.val = val;
+            this.next = next;
         }
+    }
+    int size;
+    ListNode head;
+    ListNode tail;
 
-    private SinglyListNode getNode(int index) {
-        SinglyListNode cur = init;
-            while (index-- >= 0) {
-                cur = cur.next;
-            }
+    public MyLinkedList() {
+        head = new ListNode();
+        tail = head;
+        size = 0;
+    }
+
+    private ListNode getNode(int index) {
+        ListNode cur = head;
+        while (index-- >= 0) {
+            cur = cur.next;
+        }
         return cur;
     }
 
-        /** Get the value of the index-th node in the linked list. If the index is invalid, return -1. */
-        public int get(int index) {
-            if(index < 0 || index >= ListSize){
-                System.out.println("Invalid index value to fetch.");
-                return -1;
-            }
-            return getNode(index).val;
+    public int get(int index) {
+        if (index < 0 || index >= size) {
+            return -1;
         }
-
-        /** Add a node of value val before the first element of the linked list. After the insertion, the new node will be the first node of the linked list. */
-        public void addAtHead(int val) {
-            addAtIndex(0, val);
-        }
-
-        /** Append a node of value val to the last element of the linked list. */
-        public void addAtTail(int val) {
-            tail.next = new SinglyListNode(val);
-            ListSize++;
-        }
-
-        /** Add a node of value val before the index-th node in the linked list. If index equals to the length of linked list, the node will be appended to the end of linked list. If index is greater than the length, the node will not be inserted. */
-        public void addAtIndex(int index, int val) {
-            if (index == ListSize) {
-                addAtTail(val);
-                return;
-            }
-            SinglyListNode hold = getNode(index).next;
-            getNode(index).next = new SinglyListNode(val);
-            getNode(index).next.next = hold;
-            ListSize++;
-        }
-
-        /** Delete the index-th node in the linked list, if the index is valid. */
-        public void deleteAtIndex(int index) {
-
-        }
-
-        public void printList() {
-
-        }
-
-    public static void main(String[] args) throws NullPointerException {
-
-        MyLinkedList myLinkedList = new MyLinkedList();
-        myLinkedList.addAtHead(1);
-        myLinkedList.addAtTail(3);
-        myLinkedList.addAtIndex(1, 2);    // linked list becomes 1->2->3
-        myLinkedList.get(1);              // return 2
-        myLinkedList.deleteAtIndex(1);    // now the linked list is 1->3
-        myLinkedList.get(1);              // return 3
-    }
+        return getNode(index).val;
     }
 
-/**
- * Your MyLinkedList object will be instantiated and called as such:
- * MyLinkedList obj = new MyLinkedList();
- * int param_1 = obj.get(index);
- * obj.addAtHead(val);
- * obj.addAtTail(val);
- * obj.addAtIndex(index,val);
- * obj.deleteAtIndex(index);
- */
+    public void addAtHead(int val) { // push functionality for a stack implementation
+        addAtIndex(0, val);
+    }
+
+    public void addAtTail(int val) {
+        tail.next = new ListNode(val);
+        tail.next.prev = tail;
+        tail = tail.next;
+        size++;
+    }
+
+    public void addAtIndex(int index, int val) {
+        if (index > size || index < 0) {
+            return;
+        }
+        if (index == size) {
+            addAtTail(val);
+            return;
+        }
+        ListNode newNode = new ListNode(val);
+        ListNode target = getNode(index);
+        newNode.prev = target.prev;
+        newNode.next = target;
+        target.prev.next = newNode;
+        target.prev = newNode;
+        size++;
+    }
+
+    public void addInOrder(int value){
+        if(head == null){
+            head = new ListNode(value);
+        }else{
+            if(head.val > value){ // value is the smallest in the list
+                head = new ListNode(value, head);
+            }else{
+                ListNode ref = head;
+                int index = 0;
+                while(ref != null && ref.val <= value){
+                    ref = ref.next;
+                    index++;
+                }
+                addAtIndex(index, value);
+            }
+        }
+    }
+
+    public ListNode removeFromHead(){ // pop functionality for a stack implementation
+        ListNode target = getNode(0);
+        target.prev.next = target.next;
+        if (target == tail) {
+            tail = tail.prev;
+        } else {
+            target.next.prev = target.prev;
+        }
+        size--;
+        return target;
+    }
+
+    public void removeValue(int value){
+        if(head != null){
+            if(head.val == value){
+                removeAtIndex(0);
+            }
+        }else{
+            ListNode ref = head;
+            int index = 0;
+            while( ref.val != value && ref != null){
+                ref = ref.next;
+                index++;
+            }
+            if( ref != null){
+                removeAtIndex(index);
+            }
+        }
+    }
+
+    public void removeAtIndex(int index) {
+        if (index < 0 || index >= size) {
+            return;
+        }
+        ListNode target = getNode(index);
+        target.prev.next = target.next;
+        if (target == tail) {
+            tail = tail.prev;
+        } else {
+            target.next.prev = target.prev;
+        }
+        size--;
+    }
+
+    public void printList(){
+        ListNode cur = head;
+        while(cur != tail){
+            System.out.print(cur.val + " ");
+            cur = cur.next;
+        }
+    }
+
+    public static void main(String[] args) {
+        MyLinkedList list = new MyLinkedList();
+        list.addAtHead(55);
+        list.addAtHead(54);
+        list.addAtIndex(0, 2);
+        list.printList();
+    }
+}
 
